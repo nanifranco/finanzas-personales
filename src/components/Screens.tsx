@@ -1,9 +1,69 @@
-import { useState, type FormEvent } from 'react';
-import { BY_ID, catsOf, type CatId } from '../lib/categories';
+import { useState, type CSSProperties, type FormEvent } from 'react';
+import { BY_ID, catVars, catsOf, type CatId } from '../lib/categories';
 import { money, monthName } from '../lib/money';
 import { saveStat, spendStat, totals, type AppState } from '../lib/state';
 import { BudgetFields, draftFrom, readDraft, type BudgetDraft } from './BudgetFields';
+import { CatIcon } from './Icon';
 import { SheetHead, useActions } from './ui';
+
+const dayFmt = new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+const timeFmt = new Intl.DateTimeFormat('es-MX', { hour: '2-digit', minute: '2-digit' });
+const dayKey = (ts: number) => {
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+};
+
+/** Desglose de todos los movimientos del mes, agrupados por día, para cotejar con el estado de cuenta. */
+function Breakdown({ S }: { S: AppState }) {
+  const txs = [...S.txs].sort((a, b) => a.ts - b.ts);
+  if (txs.length === 0) return <p className="empty">No registraste movimientos este mes.</p>;
+
+  const days: { key: string; ts: number; items: typeof txs }[] = [];
+  for (const t of txs) {
+    const k = dayKey(t.ts);
+    const last = days[days.length - 1];
+    if (last && last.key === k) last.items.push(t);
+    else days.push({ key: k, ts: t.ts, items: [t] });
+  }
+
+  return (
+    <div className="bd">
+      {days.map((d) => {
+        const spent = d.items.reduce((a, t) => (t.cat === 'ahorro' ? a : a + t.amt), 0);
+        const label = dayFmt.format(new Date(d.ts));
+        return (
+          <div className="bd-day" key={d.key}>
+            <div className="bd-head">
+              <span>{label.charAt(0).toUpperCase() + label.slice(1)}</span>
+              {spent > 0 && <span className="num">{money(spent)}</span>}
+            </div>
+            <div className="cl-card">
+              {d.items.map((t) => {
+                const c = BY_ID[t.cat];
+                const up = t.cat === 'ahorro';
+                return (
+                  <div className="bd-row" key={t.id} style={catVars(c) as CSSProperties}>
+                    <span className="cic">
+                      <CatIcon id={t.cat} />
+                    </span>
+                    <span className="bd-txt">
+                      <span className="bd-cat">{c.name}</span>
+                      <span className="bd-time">{timeFmt.format(new Date(t.ts))}</span>
+                    </span>
+                    <b className={`bd-amt num ${up ? 'up' : ''}`}>
+                      {up ? '+' : ''}
+                      {money(t.amt)}
+                    </b>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export function Setup({ S }: { S: AppState }) {
   const { startMonth, toast } = useActions();
@@ -106,6 +166,7 @@ function Row({ name, total, cols }: { name: string; total?: boolean; cols: [stri
 export function Closing({ S }: { S: AppState }) {
   const { setClosing, resetMonth, confirm } = useActions();
   const [copied, setCopied] = useState(false);
+  const [showTx, setShowTx] = useState(false);
   const T = totals(S);
   const sv = saveStat(S);
 
@@ -182,6 +243,14 @@ export function Closing({ S }: { S: AppState }) {
             ]}
           />
         </div>
+      </div>
+
+      <div className="cl-sec">
+        <button className="bd-toggle" type="button" aria-expanded={showTx} onClick={() => setShowTx((v) => !v)}>
+          <span>{showTx ? 'Ocultar desglose de movimientos' : 'Ver desglose de movimientos'}</span>
+          <span className="bd-count">{S.txs.length}</span>
+        </button>
+        {showTx && <Breakdown S={S} />}
       </div>
 
       <label className="check" htmlFor="cl-ok">

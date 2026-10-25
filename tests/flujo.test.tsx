@@ -44,6 +44,13 @@ describe('flujo completo de la app', () => {
     await screen.findByText('Disponible para gastar');
     fireEvent.click(screen.getByText('Cerrar mes'));
     await screen.findByText('Cierre del mes');
+    // El desglose está oculto hasta pedirlo
+    expect(again.container.querySelector('.bd')).toBeNull();
+    fireEvent.click(screen.getByText('Ver desglose de movimientos'));
+    const bd = again.container.querySelector('.bd')!;
+    expect(bd.querySelectorAll('.bd-row')).toHaveLength(1);
+    expect(bd.querySelector('.bd-amt')!.textContent).toBe('$600');
+    expect(bd.querySelector('.bd-cat')!.textContent).toBe('Restaurantes y comidas');
     const reset = screen.getByText('Resetear mes', { selector: 'button.btn' }) as HTMLButtonElement;
     expect(reset.disabled).toBe(true);
     fireEvent.click(again.container.querySelector('#cl-ok')!);
