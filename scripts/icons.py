@@ -32,7 +32,7 @@ def icon(base, size, pad_ratio, path):
 src = Image.open(sys.argv[1]).convert('RGB')
 out = sys.argv[2]
 base = square(src)
-icon(base, 180, 0, f'{out}/apple-touch-icon.png')
-icon(base, 192, 0, f'{out}/icon-192.png')
-icon(base, 512, 0, f'{out}/icon-512.png')
-icon(base, 512, 0, f'{out}/icon-maskable-512.png')
+icon(base, 180, 0, f'{out}/apple-touch-icon-v2.png')
+icon(base, 192, 0, f'{out}/icon-192-v2.png')
+icon(base, 512, 0, f'{out}/icon-512-v2.png')
+icon(base, 512, 0, f'{out}/icon-maskable-512-v2.png')

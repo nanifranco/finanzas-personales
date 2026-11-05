@@ -10,7 +10,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['apple-touch-icon.png'],
+      includeAssets: ['apple-touch-icon-v2.png'],
       manifest: {
         name: 'Finanzas Nani',
         short_name: 'Finanzas Nani',
@@ -23,9 +23,9 @@ export default defineConfig({
         background_color: '#0E1117',
         theme_color: '#0E1117',
         icons: [
-          { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+          { src: 'icon-192-v2.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icon-512-v2.png', sizes: '512x512', type: 'image/png' },
+          { src: 'icon-maskable-512-v2.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       },
       workbox: {
